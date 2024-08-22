@@ -35,7 +35,7 @@ std::map<std::string, double> getWordFrequency(std::map<std::string, int> wordCo
 		wordFrequency[word] = (double)count;
 	}
 
-	return normalizeDict(wordFrequency);
+	return normalizeMap(wordFrequency);
 }
 
 std::map<std::string, double> getLetterFrequency(std::map<std::string, double> wordFrequency)
@@ -55,7 +55,7 @@ std::map<std::string, double> getLetterFrequency(std::map<std::string, double> w
 		++it;
 	}
 
-	return normalizeDict(letterFrequency);
+	return normalizeMap(letterFrequency);
 }
 
 std::map<std::string, double> getDoubleLetterFrequency(std::map<std::string, double> wordFrequency)
@@ -78,15 +78,5 @@ std::map<std::string, double> getDoubleLetterFrequency(std::map<std::string, dou
 		++it;
 	}
 
-	return normalizeDict(doubleLetterFrequency);
-}
-
-void printDict(std::map<std::string, double> dict)
-{
-	std::map<std::string, double>::iterator it = dict.begin();
-	while (it != dict.end())
-	{
-		std::cout << it->first << ": " << it->second << "%\n";
-		++it;
-	}
+	return normalizeMap(doubleLetterFrequency);
 }

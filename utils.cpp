@@ -2,28 +2,6 @@
 
 #include "utils.h"
 
-std::map<std::string, double> normalizeDict(std::map<std::string, double> dict)
-{
-	std::map<std::string, double> normalizedDict;
-
-	double total = 0;
-	std::map<std::string, double>::iterator it = dict.begin();
-	while (it != dict.end())
-	{
-		total += it->second;
-		++it;
-	}
-
-	it = dict.begin();
-	while (it != dict.end())
-	{
-		normalizedDict[it->first] = (it->second / total);
-		++it;
-	}
-
-	return normalizedDict;
-}
-
 std::vector<char> getAlphabet()
 {
 	std::vector<char> alphabet;

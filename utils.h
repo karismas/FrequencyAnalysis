@@ -7,7 +7,52 @@
 
 std::vector<char> getAlphabet();
 std::vector<char> getAlphabetWithoutSH();
-std::map<std::string, double> normalizeDict(std::map<std::string, double> dict);
+
+template <typename E>
+std::map<E, double> normalizeMap(std::map<E, int> map)
+{
+	std::map<E, double> normalizedMap;
+
+	double total = 0;
+	typename std::map<E, int>::iterator it = map.begin();
+	while (it != map.end())
+	{
+		total += it->second;
+		++it;
+	}
+
+	it = map.begin();
+	while (it != map.end())
+	{
+		normalizedMap[it->first] = (it->second / total);
+		++it;
+	}
+
+	return normalizedMap;
+}
+
+template <typename E>
+std::map<E, double> normalizeMap(std::map<E, double> map)
+{
+	std::map<E, double> normalizedMap;
+
+	double total = 0;
+	typename std::map<E, double>::iterator it = map.begin();
+	while (it != map.end())
+	{
+		total += it->second;
+		++it;
+	}
+
+	it = map.begin();
+	while (it != map.end())
+	{
+		normalizedMap[it->first] = (it->second / total);
+		++it;
+	}
+
+	return normalizedMap;
+}
 
 template <typename T>
 void printVector(std::vector<T>* vec)

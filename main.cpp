@@ -74,6 +74,22 @@ std::string prompt(std::string question, std::vector<std::string> optionPrompts)
 	return optionPrompts[choice];
 }
 
+void bestKeyboardPrinter(int generation, Keyboard* keyboard, double score, std::map<std::string, double>* letterFrequency, std::map<std::string, double>* doubleLetterFrequency)
+{
+	std::cout << "================================================================================\n";
+
+	std::cout << "                                 GENERATION " << generation << "\n\n";
+
+	(*Keyboard::keyboards)[0]->printLayout();
+
+	std::cout << "\n                                     SCORE" << "\n";
+	std::cout << "                                    " << score << "\n";
+
+	(*Keyboard::keyboards)[0]->printFingerUsage(letterFrequency);
+	(*Keyboard::keyboards)[0]->printFingerVerticals(doubleLetterFrequency);
+	std::cout << "================================================================================\n";
+}
+
 int main()
 {
 	srand(time(NULL));
@@ -93,11 +109,13 @@ int main()
 		// numGenerations = ...
 		// numPrint = ...
 		// ...
+		std::cout << "This has not been implemented yet...\n";
+		return 0;
 	}
 
 	else
 	{
-		numOrganisms = numberPrompt("How many organisms would you like?\n");
+		numOrganisms = numberPrompt("How many organisms would you like? (must be an even number)\n");
 		numGenerations = numberPrompt("How many generations would you like?\n");
 		numPrint = numberPrompt("How many generations would you like to complete before printing the best organism's information?\n");
 	}
@@ -107,30 +125,42 @@ int main()
 	std::map<std::string, double> letterFrequency = getLetterFrequency(wordFrequency);
 	std::map<std::string, double> doubleLetterFrequency = getDoubleLetterFrequency(wordFrequency);
 
-	Keyboard::populate(1000);
+	Keyboard::populate(numOrganisms);
+
 	Keyboard* bestKeyboard;
+	int bestGeneration;
 	double bestScore = (*Keyboard::keyboards)[0]->getFitnessScore(&letterFrequency, &doubleLetterFrequency);
-	for (int i = 0; i < 250; ++i)
+
+	for (int i = 1; i <= numGenerations; ++i)
 	{
 		Keyboard::breedGeneration(&letterFrequency, &doubleLetterFrequency);
+
 		double bestGenerationScore = (*Keyboard::keyboards)[0]->getFitnessScore(&letterFrequency, &doubleLetterFrequency);
 		if (bestGenerationScore < bestScore)
 		{
 			bestKeyboard = (*Keyboard::keyboards)[0];
 			bestScore = bestGenerationScore;
+			bestGeneration = i;
 		}
-		
-		(*Keyboard::keyboards)[0]->print();
-		std::cout << bestGenerationScore << "\n";
-		(*Keyboard::keyboards)[0]->printFingerUsage(&letterFrequency);
-		(*Keyboard::keyboards)[0]->printFingerVerticals(&doubleLetterFrequency);
+
+		if (i % numPrint == 0)
+		{
+			std::cout << "\n\n";
+			bestKeyboardPrinter(i, (*Keyboard::keyboards)[0], bestGenerationScore, &letterFrequency, &doubleLetterFrequency);
+		}
 	}
 
-	std::cout << "\n\nTHE BEST\n";
-	bestKeyboard->print();
-	std::cout << bestScore << "\n";
+	std::cout << "\n\n\n*********************************** MOST FIT ***********************************\n";
+	bestKeyboardPrinter(bestGeneration, bestKeyboard, bestScore, &letterFrequency, &doubleLetterFrequency);
+	std::cout << "********************************************************************************\n\n";
 
-	delete bestKeyboard;
+	Keyboard::printStatistics();
 
-	// Repeat
+	delete Keyboard::temp;
+	for (int i = 0; i < Keyboard::keyboards->size(); ++i)
+	{
+		delete (*Keyboard::keyboards)[i];
+		(*Keyboard::keyboards)[i] = nullptr;
+	}
+	delete Keyboard::keyboards;
 }

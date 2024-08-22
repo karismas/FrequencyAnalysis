@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <array>
+#include <sstream>
 #include <string>
 
 #include "keyboard.h"
@@ -8,6 +9,32 @@
 
 std::vector<Keyboard*>* Keyboard::keyboards = new std::vector<Keyboard*>();
 std::vector<Keyboard*>* Keyboard::temp = new std::vector<Keyboard*>();
+
+std::map<char, int> Keyboard::ltp{};
+std::map<char, int> Keyboard::ltr{};
+std::map<char, int> Keyboard::ltm{};
+std::map<char, int> Keyboard::lti{};
+std::map<char, int> Keyboard::lmp{};
+std::map<char, int> Keyboard::lmr{};
+std::map<char, int> Keyboard::lmm{};
+std::map<char, int> Keyboard::lmi{};
+std::map<char, int> Keyboard::lbp{};
+std::map<char, int> Keyboard::lbr{};
+std::map<char, int> Keyboard::lbm{};
+std::map<char, int> Keyboard::lbi{};
+
+std::map<char, int> Keyboard::rtp{};
+std::map<char, int> Keyboard::rtr{};
+std::map<char, int> Keyboard::rtm{};
+std::map<char, int> Keyboard::rti{};
+std::map<char, int> Keyboard::rmp{};
+std::map<char, int> Keyboard::rmr{};
+std::map<char, int> Keyboard::rmm{};
+std::map<char, int> Keyboard::rmi{};
+std::map<char, int> Keyboard::rbp{};
+std::map<char, int> Keyboard::rbr{};
+std::map<char, int> Keyboard::rbm{};
+std::map<char, int> Keyboard::rbi{};
 
 Keyboard::Keyboard(std::array<char, 24> inLayout)
 {
@@ -39,33 +66,118 @@ Keyboard::Keyboard(std::array<char, 24> inLayout)
 	}
 }
 
+void Keyboard::trackStatistics()
+{
+	std::array<char, 24> best = (*Keyboard::keyboards)[0]->layout;
+
+	ltp[best[0]] += 1;
+	ltr[best[1]] += 1;
+	ltm[best[2]] += 1;
+	lti[best[3]] += 1;
+
+	rti[best[4]] += 1;
+	rtm[best[5]] += 1;
+	rtr[best[6]] += 1;
+	rtp[best[7]] += 1;
+
+	lmp[best[8]] += 1;
+	lmr[best[9]] += 1;
+	lmm[best[10]] += 1;
+	lmi[best[11]] += 1;
+
+	rmi[best[12]] += 1;
+	rmm[best[13]] += 1;
+	rmr[best[14]] += 1;
+	rmp[best[15]] += 1;
+
+	lbp[best[16]] += 1;
+	lbr[best[17]] += 1;
+	lbm[best[18]] += 1;
+	lbi[best[19]] += 1;
+
+	rbi[best[20]] += 1;
+	rbm[best[21]] += 1;
+	rbr[best[22]] += 1;
+	rbp[best[23]] += 1;
+}
+
 double Keyboard::getFitnessScore(std::map<std::string, double>* letterFrequency, std::map<std::string, double>* doubleLetterFrequency)
 {
-	double lpu = 8 * getLeftPinkyUsage(letterFrequency);
-	double lru = 4 * getLeftRingUsage(letterFrequency);
-	double lmu = 1 * getLeftMiddleUsage(letterFrequency);
-	double liu = 2 * getLeftIndexUsage(letterFrequency);
+	double lpu = getLeftPinkyUsage(letterFrequency);
+	double lru = getLeftRingUsage(letterFrequency);
+	double lmu = getLeftMiddleUsage(letterFrequency);
+	double liu = getLeftIndexUsage(letterFrequency);
 
-	double rpu = 8 * getRightPinkyUsage(letterFrequency);
-	double rru = 4 * getRightRingUsage(letterFrequency);
-	double rmu = 1 * getRightMiddleUsage(letterFrequency);
-	double riu = 2 * getRightIndexUsage(letterFrequency);
+	double rpu = getRightPinkyUsage(letterFrequency);
+	double rru = getRightRingUsage(letterFrequency);
+	double rmu = getRightMiddleUsage(letterFrequency);
+	double riu = getRightIndexUsage(letterFrequency);
 
-	double lpv = 8 * getLeftPinkyVerticals(doubleLetterFrequency);
-	double lrv = 4 * getLeftRingVerticals(doubleLetterFrequency);
-	double lmv = 1 * getLeftMiddleVerticals(doubleLetterFrequency);
-	double liv = 2 * getLeftIndexVerticals(doubleLetterFrequency);
+	double lpv = getLeftPinkyVerticals(doubleLetterFrequency);
+	double lrv = getLeftRingVerticals(doubleLetterFrequency);
+	double lmv = getLeftMiddleVerticals(doubleLetterFrequency);
+	double liv = getLeftIndexVerticals(doubleLetterFrequency);
              
-	double rpv = 8 * getRightPinkyVerticals(doubleLetterFrequency);
-	double rrv = 4 * getRightRingVerticals(doubleLetterFrequency);
-	double rmv = 1 * getRightMiddleVerticals(doubleLetterFrequency);
-	double riv = 2 * getRightIndexVerticals(doubleLetterFrequency);
+	double rpv = getRightPinkyVerticals(doubleLetterFrequency);
+	double rrv = getRightRingVerticals(doubleLetterFrequency);
+	double rmv = getRightMiddleVerticals(doubleLetterFrequency);
+	double riv = getRightIndexVerticals(doubleLetterFrequency);
+
+	std::map<std::string, double> leftFingerUsage{};
+	leftFingerUsage["lpu"] = lpu;
+	leftFingerUsage["lru"] = lru;
+	leftFingerUsage["lmu"] = lmu;
+	leftFingerUsage["liu"] = liu;
+
+	std::map<std::string, double> rightFingerUsage{};
+	rightFingerUsage["rpu"] = rpu;
+	rightFingerUsage["rru"] = rru;
+	rightFingerUsage["rmu"] = rmu;
+	rightFingerUsage["riu"] = riu;
+
+	std::map<std::string, double> leftFingerVerticals{};
+	leftFingerVerticals["lpv"] = lpv;
+	leftFingerVerticals["lrv"] = lrv;
+	leftFingerVerticals["lmv"] = lmv;
+	leftFingerVerticals["liv"] = liv;
+
+	std::map<std::string, double> rightFingerVerticals{};
+	rightFingerVerticals["rpv"] = rpv;
+	rightFingerVerticals["rrv"] = rrv;
+	rightFingerVerticals["rmv"] = rmv;
+	rightFingerVerticals["riv"] = riv;
+
+	leftFingerUsage = normalizeMap(leftFingerUsage);
+	rightFingerUsage = normalizeMap(rightFingerUsage);
+	leftFingerVerticals = normalizeMap(leftFingerVerticals);
+	rightFingerVerticals = normalizeMap(rightFingerVerticals);
+
+	double lpuScore = abs(leftFingerUsage["lpu"] - 0.05);
+	double lruScore = abs(leftFingerUsage["lru"] - 0.25);
+	double lmuScore = abs(leftFingerUsage["lmu"] - 0.55);
+	double liuScore = abs(leftFingerUsage["liu"] - 0.15);
+
+	double rpuScore = abs(rightFingerUsage["rpu"] - 0.05);
+	double rruScore = abs(rightFingerUsage["rru"] - 0.25);
+	double rmuScore = abs(rightFingerUsage["rmu"] - 0.55);
+	double riuScore = abs(rightFingerUsage["riu"] - 0.15);
+
+	double lpvScore = abs(leftFingerVerticals["lpv"] - 0.05);
+	double lrvScore = abs(leftFingerVerticals["lrv"] - 0.25);
+	double lmvScore = abs(leftFingerVerticals["lmv"] - 0.55);
+	double livScore = abs(leftFingerVerticals["liv"] - 0.15);
+                                             
+	double rpvScore = abs(rightFingerVerticals["rpv"] - 0.05);
+	double rrvScore = abs(rightFingerVerticals["rrv"] - 0.25);
+	double rmvScore = abs(rightFingerVerticals["rmv"] - 0.55);
+	double rivScore = abs(rightFingerVerticals["riv"] - 0.15);
+
+	double usageScore = lpuScore + lruScore + lmuScore + liuScore + rpuScore + rruScore + rmuScore + riuScore;
+	double verticalsScore = lpvScore + lrvScore + lmvScore + livScore + rpvScore + rrvScore + rmvScore + rivScore;
 
 	// 15 55 25 5
 
-	// std::cout << "\n" << (lpu + lru + lmu + liu + rpu + rru + rmu + riu) << "\n";
-	// std::cout << "\n" << 10 * (lpv + lrv + lmv + liv + rpv + rrv + rmv + riv) << "\n";
-	return (10 * (lpv + lrv + lmv + liv + rpv + rrv + rmv + riv) + (lpu + lru + lmu + liu + rpu + rru + rmu + riu));
+	return usageScore + (2 * verticalsScore);
 }
 
 void Keyboard::populate(int numOrgansims)
@@ -98,6 +210,8 @@ void Keyboard::breedGeneration(std::map<std::string, double>* letterFrequency, s
 
 	keyboards = temp;
 	temp = new std::vector<Keyboard*>();
+
+	trackStatistics();
 }
 
 void Keyboard::breedOrganisms(Keyboard* k1, Keyboard* k2, std::map<std::string, double>* letterFrequency, std::map<std::string, double>* doubleLetterFrequency)
@@ -107,31 +221,34 @@ void Keyboard::breedOrganisms(Keyboard* k1, Keyboard* k2, std::map<std::string, 
 	std::vector<char> c1{};
 	std::vector<char> c2{};
 
-	for (int i = 0; i < split; ++i)
+	int choice = rand() % 2;
+	int start = (choice == 0) ? 0 : split;
+	int end = (choice == 0) ? split : 24;
+	for (int i = start; i < end; ++i)
 	{
 		c1.emplace_back(k1->layout[i]);
 		c2.emplace_back(k2->layout[i]);
 	}
 
-	for (int i = 0; i < c1.size(); ++i)
+	for (int i = start; i < end; ++i)
 	{
-		k1->swapCharacter(i, c2[i]);
-		k2->swapCharacter(i, c1[i]);
+		k1->swapCharacter(i, c2[i - start]);
+		k2->swapCharacter(i, c1[i - start]);
 	}
 
 	temp->insert(
 		std::upper_bound(temp->begin(), temp->end(), k1,
-		[&](Keyboard* k1, Keyboard* other)
+		[&](Keyboard* first, Keyboard* second)
 		{
-			return k1->getFitnessScore(letterFrequency, doubleLetterFrequency) < other->getFitnessScore(letterFrequency, doubleLetterFrequency);
+			return first->getFitnessScore(letterFrequency, doubleLetterFrequency) < second->getFitnessScore(letterFrequency, doubleLetterFrequency);
 		}), k1
 	);
 
 	temp->insert(
 		std::upper_bound(temp->begin(), temp->end(), k2,
-		[&](Keyboard* k2, Keyboard* other)
+		[&](Keyboard* first, Keyboard* second)
 		{
-			return k2->getFitnessScore(letterFrequency, doubleLetterFrequency) < other->getFitnessScore(letterFrequency, doubleLetterFrequency);
+			return first->getFitnessScore(letterFrequency, doubleLetterFrequency) < second->getFitnessScore(letterFrequency, doubleLetterFrequency);
 		}), k2
 	);
 }
@@ -266,16 +383,16 @@ double Keyboard::getRightIndexVerticals(std::map<std::string, double>* doubleLet
 	return getFingerVerticals(doubleLetterFrequency, rightIndexIndices);
 }
 
-void Keyboard::print()
+void Keyboard::printLayout()
 {
-	std::string out = "";
+	std::string out = "                                    LAYOUT";
 	for (int i = 0; i < (sizeof(layout) / sizeof(char)); ++i)
 	{
 		if (i % 4 == 0)
 		{
 			if (i % 8 == 0)
 			{
-				out += "\n";
+				out += "\n                                   ";
 			}
 			
 			else
@@ -303,17 +420,18 @@ void Keyboard::printFingerUsage(std::map<std::string, double>* letterFrequency)
 	double rmu = getRightMiddleUsage(letterFrequency);
 	double riu = getRightIndexUsage(letterFrequency);
 
-	double total = lpu + lru + lmu + liu + rpu + rru + rmu + riu;
-	lpu *= (100 / total);
-	lru *= (100 / total);
-	lmu *= (100 / total);
-	liu *= (100 / total);
-	rpu *= (100 / total);
-	rru *= (100 / total);
-	rmu *= (100 / total);
-	riu *= (100 / total);
+	double leftTotal = lpu + lru + lmu + liu;
+	double rightTotal = rpu + rru + rmu + riu;
+	lpu *= (100 / leftTotal);
+	lru *= (100 / leftTotal);
+	lmu *= (100 / leftTotal);
+	liu *= (100 / leftTotal);
+	rpu *= (100 / rightTotal);
+	rru *= (100 / rightTotal);
+	rmu *= (100 / rightTotal);
+	riu *= (100 / rightTotal);
 
-	std::cout << "\nUSAGE\n";
+	std::cout << "\n                                     USAGE\n";
 	std::cout << lpu << "%  "
 			  << lru << "%  "
 			  << lmu << "%  "
@@ -326,27 +444,28 @@ void Keyboard::printFingerUsage(std::map<std::string, double>* letterFrequency)
 
 void Keyboard::printFingerVerticals(std::map<std::string, double>* doubleLetterFrequency)
 {
-	double lpv = 8 * getLeftPinkyVerticals(doubleLetterFrequency);
-	double lrv = 4 * getLeftRingVerticals(doubleLetterFrequency);
-	double lmv = 1 * getLeftMiddleVerticals(doubleLetterFrequency);
-	double liv = 2 * getLeftIndexVerticals(doubleLetterFrequency);
+	double lpv = getLeftPinkyVerticals(doubleLetterFrequency);
+	double lrv = getLeftRingVerticals(doubleLetterFrequency);
+	double lmv = getLeftMiddleVerticals(doubleLetterFrequency);
+	double liv = getLeftIndexVerticals(doubleLetterFrequency);
              
-	double rpv = 8 * getRightPinkyVerticals(doubleLetterFrequency);
-	double rrv = 4 * getRightRingVerticals(doubleLetterFrequency);
-	double rmv = 1 * getRightMiddleVerticals(doubleLetterFrequency);
-	double riv = 2 * getRightIndexVerticals(doubleLetterFrequency);
+	double rpv = getRightPinkyVerticals(doubleLetterFrequency);
+	double rrv = getRightRingVerticals(doubleLetterFrequency);
+	double rmv = getRightMiddleVerticals(doubleLetterFrequency);
+	double riv = getRightIndexVerticals(doubleLetterFrequency);
 
-	double total = lpv + lrv + lmv + liv + rpv + rrv + rmv + riv;
-	lpv *= (100 / total);
-	lrv *= (100 / total);
-	lmv *= (100 / total);
-	liv *= (100 / total);
-	rpv *= (100 / total);
-	rrv *= (100 / total);
-	rmv *= (100 / total);
-	riv *= (100 / total);
+	double leftTotal = lpv + lrv + lmv + liv;
+	double rightTotal = rpv + rrv + rmv + riv;
+	lpv *= (100 / leftTotal);
+	lrv *= (100 / leftTotal);
+	lmv *= (100 / leftTotal);
+	liv *= (100 / leftTotal);
+	rpv *= (100 / rightTotal);
+	rrv *= (100 / rightTotal);
+	rmv *= (100 / rightTotal);
+	riv *= (100 / rightTotal);
 
-	std::cout << "\nVERTICALS\n";
+	std::cout << "\n                                   VERTICALS\n";
 	std::cout << lpv << "%  "
 			  << lrv << "%  "
 			  << lmv << "%  "
@@ -355,4 +474,149 @@ void Keyboard::printFingerVerticals(std::map<std::string, double>* doubleLetterF
 			  << rmv << "%  "
 			  << rrv << "%  "
 			  << rpv << "%\n\n";
+}
+
+std::vector<std::map<char, double>> Keyboard::getTopThree(std::map<char, double> map)
+{
+	std::vector<std::map<char, double>> inOrder{};
+	std::vector<std::map<char, double>> out{};
+
+	std::map<char, double>::iterator it = map.begin();
+	while (it != map.end())
+	{
+		std::map<char, double> temp{};
+		temp[it->first] = it->second;
+
+		inOrder.insert(
+			std::upper_bound(inOrder.begin(), inOrder.end(), temp,
+			[](std::map<char, double> first, std::map<char, double> second)
+			{
+				std::map<char, double>::iterator firstIt = first.begin();
+				std::map<char, double>::iterator secondIt = second.begin();
+				return firstIt->second > secondIt->second;
+			}), temp
+		);
+
+		++it;
+	}
+	
+	int threeOrLess = (inOrder.size() < 3) ? inOrder.size() : 3;
+	for (int i = 0; i < threeOrLess; ++i)
+	{
+		out.emplace_back(inOrder[i]);
+	}
+
+	for (int i = out.size(); i < 3; ++i)
+	{
+		std::map<char, double> temp{};
+		temp['_'] = 0.f;
+		out.emplace_back(temp);
+	}
+
+	return out;
+}
+
+void Keyboard::printStatistics()
+{
+	std::vector<std::map<char, double>> nltpT3 = getTopThree(normalizeMap(ltp));
+	std::vector<std::map<char, double>> nltrT3 = getTopThree(normalizeMap(ltr));
+	std::vector<std::map<char, double>> nltmT3 = getTopThree(normalizeMap(ltm));
+	std::vector<std::map<char, double>> nltiT3 = getTopThree(normalizeMap(lti));
+	std::vector<std::map<char, double>> nlmpT3 = getTopThree(normalizeMap(lmp));
+	std::vector<std::map<char, double>> nlmrT3 = getTopThree(normalizeMap(lmr));
+	std::vector<std::map<char, double>> nlmmT3 = getTopThree(normalizeMap(lmm));
+	std::vector<std::map<char, double>> nlmiT3 = getTopThree(normalizeMap(lmi));
+	std::vector<std::map<char, double>> nlbpT3 = getTopThree(normalizeMap(lbp));
+	std::vector<std::map<char, double>> nlbrT3 = getTopThree(normalizeMap(lbr));
+	std::vector<std::map<char, double>> nlbmT3 = getTopThree(normalizeMap(lbm));
+	std::vector<std::map<char, double>> nlbiT3 = getTopThree(normalizeMap(lbi));
+
+	std::vector<std::map<char, double>> nrtpT3 = getTopThree(normalizeMap(rtp));
+	std::vector<std::map<char, double>> nrtrT3 = getTopThree(normalizeMap(rtr));
+	std::vector<std::map<char, double>> nrtmT3 = getTopThree(normalizeMap(rtm));
+	std::vector<std::map<char, double>> nrtiT3 = getTopThree(normalizeMap(rti));
+	std::vector<std::map<char, double>> nrmpT3 = getTopThree(normalizeMap(rmp));
+	std::vector<std::map<char, double>> nrmrT3 = getTopThree(normalizeMap(rmr));
+	std::vector<std::map<char, double>> nrmmT3 = getTopThree(normalizeMap(rmm));
+	std::vector<std::map<char, double>> nrmiT3 = getTopThree(normalizeMap(rmi));
+	std::vector<std::map<char, double>> nrbpT3 = getTopThree(normalizeMap(rbp));
+	std::vector<std::map<char, double>> nrbrT3 = getTopThree(normalizeMap(rbr));
+	std::vector<std::map<char, double>> nrbmT3 = getTopThree(normalizeMap(rbm));
+	std::vector<std::map<char, double>> nrbiT3 = getTopThree(normalizeMap(rbi));
+
+	std::ostringstream out;
+	out << "\n                                        STATISTICS\n";
+	out << "  TLP        TLR        TLM        TLI             TRI        TRM        TRR        TRP\n";
+	for (int i = 0; i < 3; ++i)
+	{
+		std::map<char, double>::iterator lpIt = nltpT3[i].begin();
+		std::map<char, double>::iterator lrIt = nltrT3[i].begin();
+		std::map<char, double>::iterator lmIt = nltmT3[i].begin();
+		std::map<char, double>::iterator liIt = nltiT3[i].begin();
+
+		std::map<char, double>::iterator rpIt = nrtpT3[i].begin();
+		std::map<char, double>::iterator rrIt = nrtrT3[i].begin();
+		std::map<char, double>::iterator rmIt = nrtmT3[i].begin();
+		std::map<char, double>::iterator riIt = nrtiT3[i].begin();
+
+		out << lpIt->first << ": " << (lpIt->second * 100) << "%    ";
+		out << lrIt->first << ": " << (lrIt->second * 100) << "%    ";
+		out << lmIt->first << ": " << (lmIt->second * 100) << "%    ";
+		out << liIt->first << ": " << (liIt->second * 100) << "%         ";
+
+		out << riIt->first << ": " << (riIt->second * 100) << "%    ";
+		out << rmIt->first << ": " << (rmIt->second * 100) << "%    ";
+		out << rrIt->first << ": " << (rrIt->second * 100) << "%    ";
+		out << rpIt->first << ": " << (rpIt->second * 100) << "%\n";
+	}
+
+	out << "\n  MLP        MLR        MLM        MLI             MRI        MRM        MRR        MRP\n";
+	for (int i = 0; i < 3; ++i)
+	{
+		std::map<char, double>::iterator lpIt = nlmpT3[i].begin();
+		std::map<char, double>::iterator lrIt = nlmrT3[i].begin();
+		std::map<char, double>::iterator lmIt = nlmmT3[i].begin();
+		std::map<char, double>::iterator liIt = nlmiT3[i].begin();
+
+		std::map<char, double>::iterator rpIt = nrmpT3[i].begin();
+		std::map<char, double>::iterator rrIt = nrmrT3[i].begin();
+		std::map<char, double>::iterator rmIt = nrmmT3[i].begin();
+		std::map<char, double>::iterator riIt = nrmiT3[i].begin();
+
+		out << lpIt->first << ": " << (lpIt->second * 100) << "%    ";
+		out << lrIt->first << ": " << (lrIt->second * 100) << "%    ";
+		out << lmIt->first << ": " << (lmIt->second * 100) << "%    ";
+		out << liIt->first << ": " << (liIt->second * 100) << "%         ";
+
+		out << riIt->first << ": " << (riIt->second * 100) << "%    ";
+		out << rmIt->first << ": " << (rmIt->second * 100) << "%    ";
+		out << rrIt->first << ": " << (rrIt->second * 100) << "%    ";
+		out << rpIt->first << ": " << (rpIt->second * 100) << "%\n";
+	}
+
+	out << "\n  BLP        BLR        BLM        BLI             BRI        BRM        BRR        BRP\n";
+	for (int i = 0; i < 3; ++i)
+	{
+		std::map<char, double>::iterator lpIt = nlbpT3[i].begin();
+		std::map<char, double>::iterator lrIt = nlbrT3[i].begin();
+		std::map<char, double>::iterator lmIt = nlbmT3[i].begin();
+		std::map<char, double>::iterator liIt = nlbiT3[i].begin();
+
+		std::map<char, double>::iterator rpIt = nrbpT3[i].begin();
+		std::map<char, double>::iterator rrIt = nrbrT3[i].begin();
+		std::map<char, double>::iterator rmIt = nrbmT3[i].begin();
+		std::map<char, double>::iterator riIt = nrbiT3[i].begin();
+
+		out << lpIt->first << ": " << (lpIt->second * 100) << "%    ";
+		out << lrIt->first << ": " << (lrIt->second * 100) << "%    ";
+		out << lmIt->first << ": " << (lmIt->second * 100) << "%    ";
+		out << liIt->first << ": " << (liIt->second * 100) << "%         ";
+
+		out << riIt->first << ": " << (riIt->second * 100) << "%    ";
+		out << rmIt->first << ": " << (rmIt->second * 100) << "%    ";
+		out << rrIt->first << ": " << (rrIt->second * 100) << "%    ";
+		out << rpIt->first << ": " << (rpIt->second * 100) << "%\n";
+	}
+
+	std::cout << out.str() << "\n";
 }

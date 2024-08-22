@@ -20,9 +20,37 @@ class Keyboard
 	double getFingerUsage(std::map<std::string, double>* letterFrequency, int indices[]);
 	double getFingerVerticals(std::map<std::string, double>* letterFrequency, int indices[]);
 
-	public:
 	void swapCharacter(int position, char newChar);
 
+	static void trackStatistics();
+	static std::vector<std::map<char, double>> getTopThree(std::map<char, double> map);
+	static std::map<char, int> ltp;
+	static std::map<char, int> ltr;
+	static std::map<char, int> ltm;
+	static std::map<char, int> lti;
+	static std::map<char, int> lmp;
+	static std::map<char, int> lmr;
+	static std::map<char, int> lmm;
+	static std::map<char, int> lmi;
+	static std::map<char, int> lbp;
+	static std::map<char, int> lbr;
+	static std::map<char, int> lbm;
+	static std::map<char, int> lbi;
+
+	static std::map<char, int> rtp;
+	static std::map<char, int> rtr;
+	static std::map<char, int> rtm;
+	static std::map<char, int> rti;
+	static std::map<char, int> rmp;
+	static std::map<char, int> rmr;
+	static std::map<char, int> rmm;
+	static std::map<char, int> rmi;
+	static std::map<char, int> rbp;
+	static std::map<char, int> rbr;
+	static std::map<char, int> rbm;
+	static std::map<char, int> rbi;
+
+	public:
 
 	static std::vector<Keyboard*>* keyboards;
 	static std::vector<Keyboard*>* temp;
@@ -54,7 +82,8 @@ class Keyboard
 	double getRightMiddleVerticals(std::map<std::string, double>* doubleLetterFrequency);
 	double getRightIndexVerticals(std::map<std::string, double>* doubleLetterFrequency);
 
-	void print();
+	void printLayout();
 	void printFingerUsage(std::map<std::string, double>* letterFrequency);
 	void printFingerVerticals(std::map<std::string, double>* doubleLetterFrequency);
+	static void printStatistics();
 };
