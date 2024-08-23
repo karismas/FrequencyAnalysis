@@ -123,6 +123,17 @@ double Keyboard::getFitnessScore(std::map<std::string, double>* letterFrequency,
 	double rmv = getRightMiddleVerticals(doubleLetterFrequency);
 	double riv = getRightIndexVerticals(doubleLetterFrequency);
 
+
+	std::map<std::string, double> totalFingerUsage{};
+	totalFingerUsage["lpu"] = lpu;
+	totalFingerUsage["lru"] = lru;
+	totalFingerUsage["lmu"] = lmu;
+	totalFingerUsage["liu"] = liu;
+	totalFingerUsage["rpu"] = rpu;
+	totalFingerUsage["rru"] = rru;
+	totalFingerUsage["rmu"] = rmu;
+	totalFingerUsage["riu"] = riu;
+
 	std::map<std::string, double> leftFingerUsage{};
 	leftFingerUsage["lpu"] = lpu;
 	leftFingerUsage["lru"] = lru;
@@ -147,10 +158,14 @@ double Keyboard::getFitnessScore(std::map<std::string, double>* letterFrequency,
 	rightFingerVerticals["rmv"] = rmv;
 	rightFingerVerticals["riv"] = riv;
 
+	totalFingerUsage = normalizeMap(totalFingerUsage);
 	leftFingerUsage = normalizeMap(leftFingerUsage);
 	rightFingerUsage = normalizeMap(rightFingerUsage);
 	leftFingerVerticals = normalizeMap(leftFingerVerticals);
 	rightFingerVerticals = normalizeMap(rightFingerVerticals);
+
+	double leftScore = abs((totalFingerUsage["lpu"] + totalFingerUsage["lru"] + totalFingerUsage["lmu"] + totalFingerUsage["liu"]) - 0.5);
+	double rightScore = abs((totalFingerUsage["rpu"] + totalFingerUsage["rru"] + totalFingerUsage["rmu"] + totalFingerUsage["riu"]) - 0.5);
 
 	double lpuScore = abs(leftFingerUsage["lpu"] - 0.05);
 	double lruScore = abs(leftFingerUsage["lru"] - 0.25);
@@ -172,17 +187,20 @@ double Keyboard::getFitnessScore(std::map<std::string, double>* letterFrequency,
 	double rmvScore = abs(rightFingerVerticals["rmv"] - 0.55);
 	double rivScore = abs(rightFingerVerticals["riv"] - 0.15);
 
+	double splitScore = leftScore + rightScore;
 	double usageScore = lpuScore + lruScore + lmuScore + liuScore + rpuScore + rruScore + rmuScore + riuScore;
 	double verticalsScore = lpvScore + lrvScore + lmvScore + livScore + rpvScore + rrvScore + rmvScore + rivScore;
 
-	// 15 55 25 5
-
-	return usageScore + (2 * verticalsScore);
+	return splitScore + usageScore + verticalsScore;
 }
 
 void Keyboard::populate(int numOrgansims)
 {
 	std::array<char, 24> constraints = {};
+
+	constraints = { 'z', 'g', 'l', 'w', 'y', 'u', 'f', 'q', 'd', 'n', 'e', 'a', 'o', 't', 'i', 'r', 'k', 'b', 'm', 'x', 'v', 'c', 'p', 'j' };
+	// constraints = { 'z', 'g', 'l', 'w', 'y', 'u', 'f', 'q', 'd', 'n', 'e', 'a', 'o', 't', 'i', 'r', 'p', 'b', 'm', 'k', 'v', 'c', 'x', 'j' };
+	//  z, k      g, b        l, m        w, x           y, v       u, c       f, p         q, j
 
 	constraints[8]  = 'd';
 	constraints[9]  = 'n';
@@ -422,24 +440,46 @@ void Keyboard::printFingerUsage(std::map<std::string, double>* letterFrequency)
 
 	double leftTotal = lpu + lru + lmu + liu;
 	double rightTotal = rpu + rru + rmu + riu;
-	lpu *= (100 / leftTotal);
-	lru *= (100 / leftTotal);
-	lmu *= (100 / leftTotal);
-	liu *= (100 / leftTotal);
-	rpu *= (100 / rightTotal);
-	rru *= (100 / rightTotal);
-	rmu *= (100 / rightTotal);
-	riu *= (100 / rightTotal);
+	float slpu = lpu * (100 / leftTotal);
+	float slru = lru * (100 / leftTotal);
+	float slmu = lmu * (100 / leftTotal);
+	float sliu = liu * (100 / leftTotal);
+
+	float srpu = rpu * (100 / rightTotal);
+	float srru = rru * (100 / rightTotal);
+	float srmu = rmu * (100 / rightTotal);
+	float sriu = riu * (100 / rightTotal);
+
+	float total = leftTotal + rightTotal;
+	float tlpu = lpu * (100 / total);
+	float tlru = lru * (100 / total);
+	float tlmu = lmu * (100 / total);
+	float tliu = liu * (100 / total);
+          
+	float trpu = rpu * (100 / total);
+	float trru = rru * (100 / total);
+	float trmu = rmu * (100 / total);
+	float triu = riu * (100 / total);
 
 	std::cout << "\n                                     USAGE\n";
-	std::cout << lpu << "%  "
-			  << lru << "%  "
-			  << lmu << "%  "
-			  << liu << "%    "
-			  << riu << "%  "
-			  << rmu << "%  "
-			  << rru << "%  "
-			  << rpu << "%\n\n";
+	std::cout << tlpu << "%  "
+			  << tlru << "%  "
+			  << tlmu << "%  "
+			  << tliu << "%    "
+			  << triu << "%  "
+			  << trmu << "%  "
+			  << trru << "%  "
+			  << trpu << "%\n\n";
+
+	std::cout << "\n                                SEPARATE USAGE\n";
+	std::cout << slpu << "%  "
+			  << slru << "%  "
+			  << slmu << "%  "
+			  << sliu << "%    "
+			  << sriu << "%  "
+			  << srmu << "%  "
+			  << srru << "%  "
+			  << srpu << "%\n\n";
 }
 
 void Keyboard::printFingerVerticals(std::map<std::string, double>* doubleLetterFrequency)
@@ -620,3 +660,46 @@ void Keyboard::printStatistics()
 
 	std::cout << out.str() << "\n";
 }
+
+
+// *********************************** MOST FIT ***********************************
+// ================================================================================
+//
+//                                     LAYOUT
+//                                    zglw yufq
+//                                    dnea otir
+//                                    kbmx vcpj
+// 
+//                                      SCORE
+//                                     0.578454
+// 
+//                                      USAGE
+// 2.87932%  13.3271%  25.527%  7.94326%    10.3978%  22.2411%  16.6483%  1.03619%
+// 
+// 
+//                                 SEPARATE USAGE
+// 5.79611%  26.8277%  51.3863%  15.9899%    20.6619%  44.1963%  33.0827%  2.05906%
+// 
+// 
+//                                    VERTICALS
+// 0.039778%  25.3634%  60.2351%  14.3617%    18.3554%  54.2241%  27.2871%  0.133388%
+// 
+// ================================================================================
+// ********************************************************************************
+
+
+// 10000 Organisms, 100 Generations
+//                                         STATISTICS
+//   TLP        TLR        TLM        TLI             TRI        TRM        TRR        TRP
+// k: 15%     g: 54%     l: 31%      w: 16%         y: 15%     u: 49%     f: 25%     j: 26%
+// z: 13%     b: 10%     m: 30%      x: 14%         j: 14%     c: 31%     w: 15%     q: 17%
+// q: 12%     p: 10%     c: 15%      y: 12%         v: 12%     l: 16%     b: 12%     z: 11%
+// 
+//   BLP        BLR        BLM        BLI             BRI        BRM        BRR        BRP
+// z: 17%     g: 34%     m: 33%      p: 13%         y: 17%     u: 39%     f: 25%     q: 23%
+// x: 16%     w: 13%     l: 26%      z: 13%         b: 14%     c: 33%     p: 20%     k: 18%
+// k: 14%     b: 8%      c: 18%      j: 12%         v: 13%     l: 26%     b: 13%     z: 16%
+//
+//  z, k      g, b?        l, m        w?, x?           y, v       u, c       f, p?         q, j
+
+

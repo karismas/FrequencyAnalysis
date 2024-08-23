@@ -74,19 +74,19 @@ std::string prompt(std::string question, std::vector<std::string> optionPrompts)
 	return optionPrompts[choice];
 }
 
-void bestKeyboardPrinter(int generation, Keyboard* keyboard, double score, std::map<std::string, double>* letterFrequency, std::map<std::string, double>* doubleLetterFrequency)
+void bestKeyboardPrinter(int generation, Keyboard keyboard, double score, std::map<std::string, double>* letterFrequency, std::map<std::string, double>* doubleLetterFrequency)
 {
 	std::cout << "================================================================================\n";
 
 	std::cout << "                                 GENERATION " << generation << "\n\n";
 
-	(*Keyboard::keyboards)[0]->printLayout();
+	keyboard.printLayout();
 
 	std::cout << "\n                                     SCORE" << "\n";
 	std::cout << "                                    " << score << "\n";
 
-	(*Keyboard::keyboards)[0]->printFingerUsage(letterFrequency);
-	(*Keyboard::keyboards)[0]->printFingerVerticals(doubleLetterFrequency);
+	keyboard.printFingerUsage(letterFrequency);
+	keyboard.printFingerVerticals(doubleLetterFrequency);
 	std::cout << "================================================================================\n";
 }
 
@@ -127,9 +127,9 @@ int main()
 
 	Keyboard::populate(numOrganisms);
 
-	Keyboard* bestKeyboard;
+	Keyboard bestKeyboard = Keyboard({});
 	int bestGeneration;
-	double bestScore = (*Keyboard::keyboards)[0]->getFitnessScore(&letterFrequency, &doubleLetterFrequency);
+	double bestScore = bestKeyboard.getFitnessScore(&letterFrequency, &doubleLetterFrequency);
 
 	for (int i = 1; i <= numGenerations; ++i)
 	{
@@ -138,7 +138,7 @@ int main()
 		double bestGenerationScore = (*Keyboard::keyboards)[0]->getFitnessScore(&letterFrequency, &doubleLetterFrequency);
 		if (bestGenerationScore < bestScore)
 		{
-			bestKeyboard = (*Keyboard::keyboards)[0];
+			bestKeyboard = *(*Keyboard::keyboards)[0];
 			bestScore = bestGenerationScore;
 			bestGeneration = i;
 		}
@@ -146,7 +146,7 @@ int main()
 		if (i % numPrint == 0)
 		{
 			std::cout << "\n\n";
-			bestKeyboardPrinter(i, (*Keyboard::keyboards)[0], bestGenerationScore, &letterFrequency, &doubleLetterFrequency);
+			bestKeyboardPrinter(i, *(*Keyboard::keyboards)[0], bestGenerationScore, &letterFrequency, &doubleLetterFrequency);
 		}
 	}
 
